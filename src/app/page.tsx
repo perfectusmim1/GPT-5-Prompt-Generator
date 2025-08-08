@@ -1,103 +1,61 @@
-import Image from "next/image";
+"use client";
+import { motion } from "framer-motion";
+import PromptInput from "@/components/PromptInput";
+import { GradientBackground } from "@/components/GradientBackground";
+import ResultCard from "@/components/ResultCard";
+import SettingsDrawer from "@/components/SettingsDrawer";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [result, setResult] = useState<string>("");
+  const [openSettings, setOpenSettings] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  // Inject the saved key into fetch requests by setting a default header via override
+  useEffect(() => {
+    // Monkey-patch global fetch to attach header if key exists
+    const originalFetch = window.fetch;
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const key = localStorage.getItem("openrouter_key") || "";
+      const headers = new Headers(init?.headers || {});
+      if (key) headers.set("x-openrouter-key", key);
+      return originalFetch(input, { ...init, headers });
+    };
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
+  return (
+    <div className="relative min-h-dvh px-4 sm:px-6">
+      <GradientBackground />
+
+      <main className="mx-auto flex min-h-dvh max-w-5xl flex-col items-center justify-center text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="space-y-4 sm:space-y-6"
+        >
+          <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight bg-gradient-to-b from-white to-white/70 dark:from-white dark:to-white/60 bg-clip-text text-transparent">
+            Meet GPT‑5
+          </h1>
+          <p className="max-w-2xl mx-auto text-base sm:text-lg text-white/80 dark:text-white/70">
+            Create high‑quality prompts in seconds. Add an image, press Enter to send.
+          </p>
+          <div className="flex justify-center gap-3">
+            <button onClick={() => setOpenSettings(true)} className="text-sm text-white/80 underline underline-offset-4 hover:text-white">API Settings</button>
+          </div>
+          <div className="pt-2">
+            <PromptInput onGenerated={setResult} />
+          </div>
+        </motion.div>
+
+        {result && (
+          <div className="mt-10 w-full flex justify-center">
+            <ResultCard content={result} />
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <SettingsDrawer open={openSettings} onClose={() => setOpenSettings(false)} />
     </div>
   );
 }
